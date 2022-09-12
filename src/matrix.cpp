@@ -1,5 +1,6 @@
 #include "matrix.hpp"
 #include "submatrix.hpp"
+#include <random>
 #include <vector>
 
 namespace ccm
@@ -75,7 +76,28 @@ Matrix::Matrix(Matrix&& other)
     std::swap(m_data, other.m_data);
 }
 
+void Matrix::swap(Matrix& b)
+{
+    std::swap(m_data, b.m_data);
+    std::swap(m_ncol, b.m_ncol);
+    std::swap(m_nrow, b.m_nrow);
+}
+
 Matrix::~Matrix() { delete[] m_data; }
+
+Matrix Matrix::randomu(usize_t n, usize_t m)
+{
+    Matrix R(n, m);
+    std::random_device rd; // Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+    for (auto it = R.begin(); it != R.end(); it++)
+    {
+        (*it) = dis(gen);
+    }
+
+    return R;
+}
 
 // iterators
 double* Matrix::begin() { return m_data; }
@@ -91,10 +113,13 @@ usize_t Matrix::row_col_to_idx(size_t r, size_t c) const { return r * m_ncol + c
 
 Matrix& Matrix::itranspose()
 {
-    if (is_square())
-        _itranspose_square();
-    else
-        _itranspose_cycle();
+    if (m_ncol != 1 && m_nrow != 1)
+    {
+        if (is_square())
+            _itranspose_square();
+        else
+            _itranspose_cycle();
+    }
     std::swap(m_nrow, m_ncol);
     return *this;
 }
@@ -155,4 +180,5 @@ std::istream& operator>>(std::istream& is, Matrix& M)
     is >> std::setprecision(old_prec);
     return is;
 }
+
 } // namespace ccm

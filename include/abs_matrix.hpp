@@ -121,6 +121,13 @@ public:
         return res;
     }
 
+    // Euclidean distance to other Matrix of same size
+    template <class Other>
+    double dist(const AbsMatrix<Other, EvalRetType>& B) const
+    {
+        return sqrt(sdist<Other>(B));
+    }
+
     // For tests and debugging
     template <class Other>
     bool operator==(const AbsMatrix<Other, EvalRetType>& B) const
@@ -136,13 +143,6 @@ public:
         return true;
     }
 
-    // Euclidean distance to other Matrix of same size
-    template <class Other>
-    double dist(const AbsMatrix<Other, EvalRetType>& B) const
-    {
-        return sqrt(sdist<Other>(B));
-    }
-
     double sum() const
     {
         double res = 0;
@@ -152,8 +152,34 @@ public:
         }
         return res;
     }
+
+    double max() const
+    {
+        double max = -INFINITY;
+        for (auto it = underlying().cfbegin(); it != underlying().cfend(); it++)
+        {
+            if (max < (*it))
+                max = *it;
+        }
+        return max;
+    }
+
     double mean() const { return sum() / (m_nrow * m_ncol); }
     double item() const { return underlying().data()[0]; }
+
+    template <class Other>
+    double dot(const AbsMatrix<Other, EvalRetType>& B) const
+    {
+        CCM_ASSERT_SAME_SIZE((*this), B);
+        auto it1 = underlying().cbegin();
+        auto it2 = B.underlying().cbegin();
+        double res = 0;
+        for (usize_t i = 0; i < m_ncol * m_nrow; i++)
+        {
+            res += (it1[i] * it2[i]);
+        }
+        return res;
+    }
 
     // element access
     double& operator()(size_t r, size_t c)

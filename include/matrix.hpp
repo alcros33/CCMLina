@@ -17,6 +17,9 @@ public:
     explicit Matrix();
     Matrix(usize_t n, usize_t m, double fill = 0);
     Matrix(Matrix&& other);
+    void swap(Matrix&);
+
+    static Matrix randomu(usize_t n, usize_t m);
 
     Matrix(const Matrix& other);
 
