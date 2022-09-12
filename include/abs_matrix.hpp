@@ -44,10 +44,10 @@ namespace ccm
     }                                                                                              \
     friend EvalRetType operator OP(double lhs, const AbsMatrix& rhs)                               \
     {                                                                                              \
-        EvalRetType res(underlying());                                                             \
+        EvalRetType res(rhs.underlying());                                                         \
         for (auto it = res.begin(); it != res.end(); it++)                                         \
         {                                                                                          \
-            (*it) = rhs OP(*it);                                                                   \
+            (*it) = lhs OP(*it);                                                                   \
         }                                                                                          \
         return res;                                                                                \
     }
@@ -195,8 +195,8 @@ public:
     template <class Other>
     EvalRetType matmul(const AbsMatrix<Other, EvalRetType>& B) const
     {
-        CCM_ASSERT(m_ncol == B.cols(), "Mismatched dimensions for matmul");
-        EvalRetType res(m_nrow, B.cols());
+        CCM_ASSERT((m_ncol == B.rows()), "Mismatched dimensions for matmul");
+        EvalRetType res(m_nrow, B.cols(), 0);
         _matmul(B, res);
         return res;
     }
@@ -219,7 +219,7 @@ public:
                 Bp = BT.data() + j * BT.cols(); // select jth row from BTransposed
                 for (usize_t k = 0; k < m_ncol; k++)
                 {
-                    *Rp += Ap[k] * Bp[k];
+                    (*Rp) += Ap[k] * Bp[k];
                 }
             }
         }
