@@ -31,7 +31,10 @@ namespace ccm
     EvalRetType operator OP(double rhs) const                                                      \
     {                                                                                              \
         EvalRetType res(underlying());                                                             \
-        res OP## = rhs;                                                                            \
+        for (auto it = res.begin(); it != res.end(); it++)                                         \
+        {                                                                                          \
+            (*it) OP## = rhs;                                                                      \
+        }                                                                                          \
         return res;                                                                                \
     }                                                                                              \
     UnderlyingT& operator OP##=(double rhs)                                                        \
@@ -93,7 +96,7 @@ public:
         return res;
     }
     // L2 Norm of matrix
-    double norm() const { return sqrt(snorm()); }
+    double norm() const { return sqrt(this->snorm()); }
 
     // Divides all elements by the norm, so that the norm becomes 1
     UnderlyingT& normalize()

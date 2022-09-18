@@ -1,6 +1,7 @@
 #pragma once
 #include "abs_matrix.hpp"
 #include "submatrix.hpp"
+#include <vector>
 
 namespace ccm
 {
@@ -59,6 +60,12 @@ public:
 
     SubMatrix slice(usize_t from_row, usize_t to_row, usize_t from_col, usize_t to_col);
     const SubMatrix slice(usize_t from_row, usize_t to_row, usize_t from_col, usize_t to_col) const;
+
+    SubMatrix row(usize_t r);
+    const SubMatrix row(usize_t r) const;
+
+    SubMatrix col(usize_t c);
+    const SubMatrix col(usize_t c) const;
 
     // Transposes the matrix in-place
     Matrix& itranspose();

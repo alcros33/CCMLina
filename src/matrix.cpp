@@ -166,6 +166,28 @@ Matrix::slice(usize_t from_row, usize_t to_row, usize_t from_col, usize_t to_col
     return SubMatrix(*this, from_row, from_col, (to_row - from_row), (to_col - from_col));
 }
 
+SubMatrix Matrix::row(usize_t r)
+{
+    CCM_ASSERT((r < m_nrow), "Row out of range");
+    return slice(r, r + 1, 0, m_ncol);
+}
+const SubMatrix Matrix::row(usize_t r) const
+{
+    CCM_ASSERT((r < m_nrow), "Row out of range");
+    return slice(r, r + 1, 0, m_ncol);
+}
+
+SubMatrix Matrix::col(usize_t c)
+{
+    CCM_ASSERT((c < m_ncol), "Column out of range");
+    return slice(0, m_nrow, c, c + 1);
+}
+const SubMatrix Matrix::col(usize_t c) const
+{
+    CCM_ASSERT((c < m_ncol), "Column out of range");
+    return slice(0, m_nrow, c, c + 1);
+}
+
 // IO
 
 std::istream& operator>>(std::istream& is, Matrix& M)
