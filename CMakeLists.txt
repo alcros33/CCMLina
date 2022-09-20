@@ -32,8 +32,7 @@ message(STATUS "Building with the following extra flags: ${CMAKE_CXX_FLAGS}")
 # -------------#
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# file(GLOB SOURCES "src/*.cpp*")
-set(SOURCES src/matrix.cpp src/submatrix.cpp src/factorization.cpp src/asolve.cpp)
+file(GLOB SOURCES "src/*.cpp*")
 
 # ---------------#
 # --- Library ---#
