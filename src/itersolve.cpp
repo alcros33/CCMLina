@@ -2,7 +2,7 @@
 namespace ccm
 {
 void _solve_gauss_seidel(
-  const Matrix& A, const Matrix& b, Matrix& xout, double eps = 1E-5, usize_t maxiters = 1000)
+  const Matrix& A, const Matrix& b, Matrix& xout, double eps, usize_t maxiters)
 {
     int itt = 0;
     auto n = A.rows();
@@ -29,8 +29,7 @@ void _solve_gauss_seidel(
     } while ((itt++) < maxiters && rel_err > eps);
 }
 
-void _solve_jacobi(
-  const Matrix& A, const Matrix& b, Matrix& xout, double eps = 1E-5, usize_t maxiters = 1000)
+void _solve_jacobi(const Matrix& A, const Matrix& b, Matrix& xout, double eps, usize_t maxiters)
 {
     int itt = 0;
     auto n = A.rows();
