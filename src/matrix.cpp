@@ -85,6 +85,17 @@ void Matrix::swap(Matrix& b)
 
 Matrix::~Matrix() { delete[] m_data; }
 
+Matrix& Matrix::resize(usize_t n, usize_t m)
+{
+    if (m * n > m_nrow * m_ncol)
+    {
+        delete[] m_data;
+        m_data = new double[m * n];
+    }
+    m_nrow = n, m_ncol = m;
+    return *this;
+}
+
 Matrix Matrix::randomu(usize_t n, usize_t m)
 {
     Matrix R(n, m);
@@ -96,6 +107,14 @@ Matrix Matrix::randomu(usize_t n, usize_t m)
         (*it) = dis(gen);
     }
 
+    return R;
+}
+
+Matrix Matrix::eye(usize_t n)
+{
+    Matrix R(n, n);
+    for (usize_t i = 0; i < n; i++)
+        R(i, i) = 1;
     return R;
 }
 

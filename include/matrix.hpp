@@ -21,6 +21,7 @@ public:
     void swap(Matrix&);
 
     static Matrix randomu(usize_t n, usize_t m);
+    static Matrix eye(usize_t n);
 
     Matrix(const Matrix& other);
 
@@ -37,6 +38,10 @@ public:
     // Matrix& operator=(const BandMatrix& rhs);
 
     ~Matrix();
+
+    // Resizes matrix, re-allocating if needed
+    // Data is lost in the process
+    Matrix& resize(usize_t n, usize_t m);
 
     // Iterator of all elements
     double* begin();
