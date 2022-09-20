@@ -4,7 +4,7 @@
 
 namespace ccm
 {
-enum class SolveMethods
+enum class SolveMethod
 {
     Gauss,
     Crout,
@@ -16,8 +16,8 @@ enum class SolveMethods
 };
 
 // Solves the linear system Ax=b
-void _solve(const Matrix& A, const Matrix& b, Matrix& xout, SolveMethods method);
+void _solve(const Matrix& A, const Matrix& b, Matrix& xout, SolveMethod method);
 // Solves the linear system Ax=b
-Matrix solve(const Matrix& A, const Matrix& b, SolveMethods method);
+Matrix solve(const Matrix& A, const Matrix& b, SolveMethod method);
 
 } // namespace ccm
