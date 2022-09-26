@@ -36,6 +36,7 @@ public:
     Matrix& operator=(const SubMatrix& rhs);
     // Matrix& operator=(const DiagMatrix& rhs);
     // Matrix& operator=(const BandMatrix& rhs);
+    Matrix& operator=(Matrix&& rhs);
 
     ~Matrix();
 

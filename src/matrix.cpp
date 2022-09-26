@@ -55,7 +55,7 @@ Matrix::Matrix(const Matrix& other) : parent()
 #define MATRIX_ASSIGN_IMPL(OtherMat)                                                               \
     Matrix& Matrix::operator=(const OtherMat& rhs)                                                 \
     {                                                                                              \
-        CCM_ASSERT_SAME_SIZE((*this), rhs);                                                        \
+        resize(rhs.rows(), rhs.cols());                                                            \
         auto it1 = begin();                                                                        \
         auto it2 = rhs.cbegin();                                                                   \
         for (size_t i = 0; i < m_ncol * m_nrow; i++)                                               \
@@ -69,6 +69,12 @@ MATRIX_ASSIGN_IMPL(Matrix)
 MATRIX_ASSIGN_IMPL(SubMatrix)
 // ASSIGN_MAT_IMPL(DiagMatrix)
 // ASSIGN_MAT_IMPL(BandMatrix)
+
+Matrix& Matrix::operator=(Matrix&& rhs)
+{
+    swap(rhs);
+    return *this;
+}
 
 Matrix::Matrix(Matrix&& other)
 {
