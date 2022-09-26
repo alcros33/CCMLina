@@ -211,6 +211,8 @@ public:
 
     // Operators
 
+    UnderlyingT operator-() const { return this->operator*(-1); }
+
     CCM_ABS_EWISE_OP_IMPL(+)
     CCM_ABS_EWISE_OP_IMPL(-)
     CCM_ABS_EWISE_OP_IMPL(*)
@@ -224,9 +226,30 @@ public:
     template <class Other>
     EvalRetType matmul(const AbsMatrix<Other, EvalRetType>& B) const
     {
-        CCM_ASSERT((m_ncol == B.rows()), "Mismatched dimensions for matmul");
         EvalRetType res(m_nrow, B.cols(), 0);
+        CCM_ASSERT((m_ncol == B.rows()), "Mismatched dimensions for matmul");
         _matmul(B, res);
+        return res;
+    }
+    template <class Other>
+    EvalRetType matmul(AbsMatrix<Other, EvalRetType>& B) const
+    {
+        EvalRetType res(m_nrow, B.cols(), 0);
+        CCM_ASSERT((m_ncol == B.rows()), "Mismatched dimensions for matmul");
+        B.underlying().itranspose();
+        _tmatmul(B, res);
+        B.underlying().itranspose();
+        return res;
+    }
+
+    // like matmul but asumes a transposed B
+    // Less memory consumption
+    template <class Other>
+    EvalRetType tmatmul(const AbsMatrix<Other, EvalRetType>& B) const
+    {
+        EvalRetType res(m_nrow, B.rows(), 0);
+        CCM_ASSERT((m_ncol == B.cols()), "Mismatched dimensions for matmul");
+        _tmatmul(B, res);
         return res;
     }
 
@@ -234,22 +257,85 @@ public:
     template <class Other>
     void _matmul(const AbsMatrix<Other, EvalRetType>& B, EvalRetType& ResOut) const
     {
+        CCM_ASSERT((m_ncol == B.rows()), "Mismatched dimensions for matmul");
+        CCM_ASSERT((m_nrow == ResOut.rows() && B.cols() == ResOut.cols()),
+                   "Mismatched output dimensions for matmul");
         // Transpose B first because iterating over cols is faster
         auto BT = B.transpose();
-        double *Rp, *Bp;
+        const double* Bp;
         auto Ap = underlying().cbegin();
-#pragma omp parallel for collapse(2) private(Rp, Ap, Bp)
+        double sum;
+#pragma omp parallel for collapse(2) private(Ap, Bp, sum)
         for (usize_t i = 0; i < ResOut.rows(); i++)
         {
             for (usize_t j = 0; j < ResOut.cols(); j++)
             {
-                Rp = ResOut.data() + i * ResOut.cols() + j; // select ith row jth column from result
+                sum = 0;
                 Ap = underlying().cbegin() + i * m_ncol; // Select ith row from A
                 Bp = BT.data() + j * BT.cols(); // select jth row from BTransposed
                 for (usize_t k = 0; k < m_ncol; k++)
                 {
-                    (*Rp) += Ap[k] * Bp[k];
+                    sum += Ap[k] * Bp[k];
                 }
+                ResOut(i, j) = sum;
+            }
+        }
+    }
+
+    // Stores matmul result in res output parameter
+    template <class Other>
+    void _matmul(AbsMatrix<Other, EvalRetType>& B, EvalRetType& ResOut) const
+    {
+        CCM_ASSERT((m_ncol == B.rows()), "Mismatched dimensions for matmul");
+        CCM_ASSERT((m_nrow == ResOut.rows() && B.cols() == ResOut.cols()),
+                   "Mismatched output dimensions for matmul");
+        // Transpose B first because iterating over cols is faster
+        B.underlying().itranspose();
+        double* Bp;
+        auto Ap = underlying().cbegin();
+        double sum;
+#pragma omp parallel for collapse(2) private(Ap, Bp, sum)
+        for (usize_t i = 0; i < ResOut.rows(); i++)
+        {
+            for (usize_t j = 0; j < ResOut.cols(); j++)
+            {
+                sum = 0;
+                Ap = underlying().cbegin() + i * m_ncol; // Select ith row from A
+                Bp = B.data() + j * B.cols(); // select jth row from BTransposed
+                for (usize_t k = 0; k < m_ncol; k++)
+                {
+                    sum += Ap[k] * Bp[k];
+                }
+                ResOut(i, j) = sum;
+            }
+        }
+        B.underlying().itranspose();
+    }
+
+    // Stores tmatmul result in res output parameter
+    template <class Other>
+    void _tmatmul(const AbsMatrix<Other, EvalRetType>& B, EvalRetType& ResOut) const
+    {
+        CCM_ASSERT((m_ncol == B.cols()), "Mismatched dimensions for matmul");
+        CCM_ASSERT((m_nrow == ResOut.rows() && B.rows() == ResOut.cols()),
+                   "Mismatched output dimensions for matmul");
+        // Transpose B first because iterating over cols is faster
+        const double* Bp;
+        auto Ap = underlying().cbegin();
+        double sum;
+#pragma omp parallel for collapse(2) private(Ap, Bp, sum)
+        for (usize_t i = 0; i < ResOut.rows(); i++)
+        {
+            for (usize_t j = 0; j < ResOut.cols(); j++)
+            {
+                sum = 0;
+                Ap = underlying().cbegin() + i * m_ncol; // Select ith row from A
+                Bp = B.data() + j * B.cols(); // select jth row from BTransposed
+                for (usize_t k = 0; k < m_ncol; k++)
+                {
+                    sum += Ap[k] * Bp[k];
+                }
+                ResOut(i, j) = sum;
             }
         }
     }
