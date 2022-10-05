@@ -223,6 +223,25 @@ public:
     CCM_ABS_EWISE_SINGLE_OP_IMPL(*)
     CCM_ABS_EWISE_SINGLE_OP_IMPL(/)
 
+    EvalRetType transform(std::function<double(double)> F) const
+    {
+        EvalRetType res(underlying());
+        for (auto it = res.begin(); it < res.end(); it++)
+        {
+            (*it) = F(*it);
+        }
+        return res;
+    }
+
+    UnderlyingT& apply(std::function<double(double)> F)
+    {
+        for (auto it = underlying().fbegin(); it < underlying().fend(); it++)
+        {
+            (*it) = F(*it);
+        }
+        return underlying();
+    }
+
     template <class Other>
     EvalRetType matmul(const AbsMatrix<Other, EvalRetType>& B) const
     {
