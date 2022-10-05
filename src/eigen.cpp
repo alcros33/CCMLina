@@ -15,7 +15,7 @@ std::tuple<double, Matrix> eig_rayleigh(const Matrix& A, Matrix& x0, double mu0,
     {
         for (usize_t i = 0; i < A.rows(); i++)
             AmuI(i, i) = A(i, i) - lam;
-        _solve_gauss(AmuI, phi, x0);
+        x0 = solve_grad_precond(AmuI, phi);
         lam_old = lam;
         lam += 1 / phi.dot(x0);
         x0.normalize();
