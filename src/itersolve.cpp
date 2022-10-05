@@ -56,4 +56,68 @@ void _solve_jacobi(const Matrix& A, const Matrix& b, Matrix& xout, double eps, u
         xout.swap(x_new);
     } while ((itt++) < maxiters && rel_err > eps);
 }
+
+Matrix solve_grad(const Matrix& A, const Matrix& b, double eps)
+{
+    Matrix x(A.rows(), 1, 0);
+    Matrix r = -b;
+    Matrix P = -r;
+    Matrix W = P;
+    double alpha, beta;
+    double rsnorm = r.snorm(), newrsnorm;
+    while (sqrt(rsnorm) > eps)
+    {
+        A._matmul(P, W);
+        alpha = rsnorm / P.dot(W);
+        x += P * alpha;
+        r += W * alpha;
+        newrsnorm = r.snorm();
+        beta = newrsnorm / rsnorm;
+        rsnorm = newrsnorm;
+        P *= beta;
+        P -= r;
+    }
+
+    return x;
+}
+
+void diag_matmul(const Matrix& A, const Matrix& y, Matrix& xout)
+{
+    for (usize_t i = 0; i < A.rows(); i++)
+        xout(i, 0) = y(i, 0) * A(i, i);
+}
+
+Matrix solve_grad_precond(const Matrix& A, const Matrix& b, double eps)
+{
+
+    Matrix x(A.rows(), 1, 0);
+    Matrix r = -b;
+    Matrix Minv(A.rows(), A.cols());
+    for (usize_t i = 0; i < A.rows(); i++)
+        Minv(i, i) = 1 / A(i, i);
+
+    Matrix y = r;
+    diag_matmul(Minv, r, y);
+    Matrix P = -y, W = P;
+    double alpha, beta;
+    double rdoty = r.dot(y), newrdoty;
+    while (true)
+    {
+        A._matmul(P, W);
+        alpha = rdoty / P.dot(W);
+        x += P * alpha;
+        r += W * alpha;
+        if (r.norm() < eps)
+            break;
+        diag_matmul(Minv, r, y);
+        newrdoty = r.dot(y);
+        beta = newrdoty / rdoty;
+        rdoty = newrdoty;
+        P *= beta;
+        P -= y;
+    }
+
+    return x;
+}
+
 } // namespace ccm
