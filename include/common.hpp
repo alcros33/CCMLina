@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <omp.h>
