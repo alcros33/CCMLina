@@ -169,4 +169,10 @@ Matrix solve_gauss(const Matrix& A, const Matrix& b)
     return x;
 }
 
+Matrix solve_QR(const Matrix& Q, const Matrix& R, const Matrix& b)
+{
+    auto qtb = Q.transpose().matmul(b);
+    return solve_upper(R, qtb);
+}
+
 } // namespace ccm

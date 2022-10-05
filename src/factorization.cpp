@@ -150,6 +150,28 @@ void _factor_cholesky(const Matrix& A, Matrix& Lout)
     }
 }
 
+void _factor_qr(const Matrix& A, Matrix& Qout, Matrix& Rout)
+{
+    auto n = A.rows();
+    CCM_ASSERT((A.is_square()), "Only for square matrices");
+    CCM_ASSERT_SAME_SIZE(A, Qout);
+    CCM_ASSERT_SAME_SIZE(A, Rout);
+
+    for (usize_t i = 0; i < n; i++)
+    {
+        auto Q_i = Qout.col(i);
+        auto A_i = A.col(i);
+        for (usize_t j = 0; j < i; j++)
+        {
+            auto Q_j = Qout.col(j);
+            Rout(j, i) = Q_j.dot(A_i);
+            Q_i -= Q_j * Rout(j, i);
+        }
+        Rout(i, i) = Q_i.norm();
+        Q_i /= Rout(i, i);
+    }
+}
+
 auto factor_crout(const Matrix& A) -> std::tuple<Matrix, Matrix>
 {
     Matrix L(A.rows(), A.cols()), U(A.rows(), A.cols());
@@ -176,6 +198,14 @@ Matrix factor_cholesky(const Matrix& A)
     Matrix L(A.rows(), A.cols());
     _factor_cholesky(A, L);
     return L;
+}
+
+auto factor_qr(const Matrix& A) -> std::tuple<Matrix, Matrix>
+{
+    auto QR = std::make_tuple(Matrix(A), Matrix(A.rows(), A.cols()));
+    CCM_ASSERT((A.is_square()), "Only for square matrices");
+    _factor_qr(A, std::get<0>(QR), std::get<1>(QR));
+    return QR;
 }
 
 } // namespace ccm

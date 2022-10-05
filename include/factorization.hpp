@@ -30,4 +30,13 @@ void _factor_cholesky(const Matrix& A, Matrix& Lout);
 // Return a Matrix L (lower triangular) such that A=LL^t. A must be symetric
 Matrix factor_cholesky(const Matrix& A);
 
+// Returns two matrices QR such that A=QR.
+// Q has orthonormal columns
+// R is upper triangular matrix
+void _factor_qr(const Matrix& A, Matrix& Qout, Matrix& Rout);
+// Returns two matrices QR such that A=QR.
+// Q has orthonormal columns
+// R is upper triangular matrix
+auto factor_qr(const Matrix& A) -> std::tuple<Matrix, Matrix>;
+
 } // namespace ccm
