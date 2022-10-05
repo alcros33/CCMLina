@@ -2,6 +2,30 @@
 
 namespace ccm
 {
+
+std::tuple<double, Matrix> eig_rayleigh(const Matrix& A, Matrix& x0, double mu0, double eps)
+{
+    auto LP = std::make_tuple(mu0, Matrix(x0));
+    auto& lam = std::get<0>(LP);
+    auto& phi = std::get<1>(LP);
+    Matrix AmuI = A;
+    double lam_old;
+    phi.normalize();
+    do
+    {
+        for (usize_t i = 0; i < A.rows(); i++)
+            AmuI(i, i) = A(i, i) - lam;
+        _solve_gauss(AmuI, phi, x0);
+        lam_old = lam;
+        lam += 1 / phi.dot(x0);
+        x0.normalize();
+        phi.swap(x0);
+    } while (std::abs(lam - lam_old) > eps);
+    if (phi(0, 0) < 0)
+        phi *= -1;
+    return LP;
+}
+
 std::tuple<Matrix, Matrix> eig_power(const Matrix& A, usize_t n, double eps)
 {
     CCM_ASSERT((A.is_square()), "Only for square matrices");
@@ -124,9 +148,9 @@ std::tuple<Matrix, Matrix> eig_inv_power(const Matrix& A, usize_t n, SolveMethod
     return std::make_tuple(lam, phis);
 }
 
-auto matrix_max_offdiag(const Matrix& A)
+std::tuple<usize_t, usize_t> matrix_max_offdiag(const Matrix& A)
 {
-    std::tuple<usize_t, usize_t> idx{0, 0};
+    std::tuple<usize_t, usize_t> idx{0, 1};
     double m_v = 0;
     for (usize_t i = 0; i < A.rows(); i++)
     {
@@ -186,6 +210,133 @@ std::tuple<Matrix, Matrix> eig_jacobi(const ccm::Matrix& A, double eps)
         std::tie(i, j) = matrix_max_offdiag(Lam);
     }
     return std::make_tuple(Lam, Phi);
+}
+
+std::tuple<Matrix, Matrix>
+eig_subspace_pow(const Matrix& A, usize_t m, int iters, double eps, double jacobi_eps)
+{
+    auto LP = std::make_tuple(Matrix(m, 1), Matrix::randomu(A.rows(), m));
+    CCM_ASSERT((A.is_square()), "Only for square matrices");
+    CCM_ASSERT((A.rows() > m), "m must be less than the size of a");
+    auto n = A.rows();
+
+    auto& Phi = std::get<1>(LP);
+    auto B = Matrix::eye(m);
+    Matrix APhi(m, n);
+    Matrix Z(m, m);
+    Matrix Phitmp = Phi;
+    Matrix tmp(n, 1), tmpnew(1, n);
+
+    std::vector<double> ws(m);
+    usize_t i, j;
+    while (true)
+    {
+        // power method for each Phi_i
+        for (usize_t i = 0; i < m; i++)
+        {
+            tmp = Phi.col(i);
+            tmp.normalize();
+            for (int itts = 0; itts < iters; itts++)
+            {
+                for (usize_t v_idx = 0; v_idx < i; v_idx++)
+                {
+                    ws[v_idx] = tmp.dot(Phi.col(v_idx));
+                    tmp -= (ws[v_idx] * Phi.col(v_idx));
+                }
+                tmp.itranspose()._tmatmul(A, tmpnew);
+                tmp.swap(tmpnew);
+                tmp.itranspose().normalize();
+            }
+            Phi.col(i) = tmp;
+        }
+
+        Phi.itranspose();
+        Phi._tmatmul(A, APhi); // Since A is symetric
+        APhi._tmatmul(Phi, B); // Phi is still transposed
+        Phi.itranspose();
+
+        std::tie(i, j) = matrix_max_offdiag(B);
+        if (std::abs(B(i, j)) < eps)
+            break;
+
+        Z = std::get<1>(eig_jacobi(B, jacobi_eps));
+        Phi._matmul(Z, Phitmp);
+        Phi.swap(Phitmp);
+    }
+    auto& Lam = std::get<0>(LP);
+    for (usize_t i = 0; i < m; i++)
+    {
+        if (Phi(0, i) < 0)
+            Phi.col(i) *= -1;
+        Lam(i, 0) = B(i, i);
+    }
+    return LP;
+}
+
+std::tuple<Matrix, Matrix>
+eig_subspace_inv(const Matrix& A, usize_t m, int inv_iters, double eps, double jacobi_eps)
+{
+    auto LP = std::make_tuple(Matrix(m, 1), Matrix::randomu(A.rows(), m));
+    CCM_ASSERT((A.is_square()), "Only for square matrices");
+    CCM_ASSERT((A.rows() > m), "m must be less than the size of a");
+    auto n = A.rows();
+
+    auto& Phi = std::get<1>(LP);
+    auto L = factor_cholesky(A);
+    Matrix APhi(m, n);
+    Matrix Z(m, m);
+    Matrix tmp(n, 1);
+    Matrix Phitmp = Phi;
+
+    auto B = Matrix::eye(m);
+    Matrix B_old(B);
+
+    std::vector<double> ws(m);
+    usize_t i, j;
+    while (true)
+    {
+        // Inverse power method for each Phi_i
+        for (usize_t i = 0; i < m; i++)
+        {
+            tmp = Phi.col(i);
+            tmp.normalize();
+
+            for (int itts = 0; itts < inv_iters; itts++)
+            {
+                for (usize_t v_idx = 0; v_idx < i; v_idx++)
+                {
+                    ws[v_idx] = tmp.dot(Phi.col(v_idx));
+                    tmp -= (ws[v_idx] * Phi.col(v_idx));
+                }
+                _solve_cholesky(L, tmp, tmp);
+                tmp.normalize();
+            }
+            Phi.col(i) = tmp;
+        }
+
+        Phi.itranspose();
+        Phi._tmatmul(A, APhi); // Since A is symetric
+        APhi._tmatmul(Phi, B); // Phi is still transposed
+        Phi.itranspose();
+
+        std::tie(i, j) = matrix_max_offdiag(B);
+        if (std::abs(B(i, j)) < eps)
+            break;
+
+        Z = std::get<1>(eig_jacobi(B, jacobi_eps));
+
+        Phi._matmul(Z, Phitmp);
+        Phi.swap(Phitmp);
+    }
+    auto& Lam = std::get<0>(LP);
+    for (usize_t i = 0; i < m; i++)
+    {
+        if (Phi(0, i) < 0)
+            Phi.col(i) *= -1;
+        Lam(i, 0) = B(i, i);
+    }
+
+    return LP;
 }
 
 } // namespace ccm
