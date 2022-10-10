@@ -215,14 +215,11 @@ const SubMatrix Matrix::col(size_t c) const
 
 std::istream& operator>>(std::istream& is, Matrix& M)
 {
-    auto old_prec = is.precision();
     is >> M.m_nrow >> M.m_ncol;
-    is >> std::setprecision(12);
     delete[] M.m_data;
     M.m_data = new double[M.m_ncol * M.m_nrow];
     for (size_t i = 0; i < M.m_ncol * M.m_nrow; i++)
         is >> M.m_data[i];
-    is >> std::setprecision(old_prec);
     return is;
 }
 

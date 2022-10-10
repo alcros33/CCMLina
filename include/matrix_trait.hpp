@@ -323,9 +323,7 @@ protected:
 template <class UnderlyingT, class EvalRetType>
 std::ostream& operator<<(std::ostream& os, const MatrixTrait<UnderlyingT, EvalRetType>& M)
 {
-    auto old_prec = os.precision();
     os << M.rows() << " " << M.cols() << "\n";
-    os << std::setprecision(12);
     for (size_t i = 0; i < M.rows(); i++)
     {
         for (size_t j = 0; j < M.cols(); j++)
@@ -337,7 +335,6 @@ std::ostream& operator<<(std::ostream& os, const MatrixTrait<UnderlyingT, EvalRe
         if (i != (M.rows() - 1))
             os << "\n";
     }
-    os << std::setprecision(old_prec);
     return os;
 }
 } // namespace ccm
