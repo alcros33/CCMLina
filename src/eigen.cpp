@@ -13,7 +13,7 @@ std::tuple<double, Matrix> eig_rayleigh(const Matrix& A, Matrix& x0, double mu0,
     phi.normalize();
     do
     {
-        for (usize_t i = 0; i < A.rows(); i++)
+        for (size_t i = 0; i < A.rows(); i++)
             AmuI(i, i) = A(i, i) - lam;
         x0 = solve_grad_precond(AmuI, phi);
         lam_old = lam;
@@ -26,7 +26,7 @@ std::tuple<double, Matrix> eig_rayleigh(const Matrix& A, Matrix& x0, double mu0,
     return LP;
 }
 
-std::tuple<Matrix, Matrix> eig_power(const Matrix& A, usize_t n, double eps)
+std::tuple<Matrix, Matrix> eig_power(const Matrix& A, size_t n, double eps)
 {
     CCM_ASSERT((A.is_square()), "Only for square matrices");
 
@@ -39,7 +39,7 @@ std::tuple<Matrix, Matrix> eig_power(const Matrix& A, usize_t n, double eps)
     Matrix tmp(sz, 1);
     double last_lam;
 
-    for (usize_t i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
         VS.emplace_back(Matrix::randomu(sz, 1));
         VS[i].normalize();
@@ -47,9 +47,9 @@ std::tuple<Matrix, Matrix> eig_power(const Matrix& A, usize_t n, double eps)
         do
         {
             last_lam = lam(i, 0);
-            for (usize_t v_idx = 0; v_idx < i; v_idx++)
+            for (size_t v_idx = 0; v_idx < i; v_idx++)
                 ws[v_idx] = tmp.dot(VS[v_idx]);
-            for (usize_t v_idx = 0; v_idx < i; v_idx++)
+            for (size_t v_idx = 0; v_idx < i; v_idx++)
                 tmp -= (ws[v_idx] * VS[v_idx]);
             tmp.normalize();
             A._matmul(tmp, VS[i]);
@@ -60,13 +60,13 @@ std::tuple<Matrix, Matrix> eig_power(const Matrix& A, usize_t n, double eps)
     }
 
     Matrix phis(sz, n);
-    for (usize_t i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
         phis.slice(0, sz, i, i + 1) = VS[i];
 
     return std::make_tuple(lam, phis);
 }
 
-std::tuple<Matrix, Matrix> eig_inv_power(const Matrix& A, usize_t n, SolveMethod method, double eps)
+std::tuple<Matrix, Matrix> eig_inv_power(const Matrix& A, size_t n, SolveMethod method, double eps)
 {
     CCM_ASSERT((A.is_square()), "Only for square matrices");
 
@@ -99,7 +99,7 @@ std::tuple<Matrix, Matrix> eig_inv_power(const Matrix& A, usize_t n, SolveMethod
     Matrix tmp(sz, 1);
     double last_lam;
 
-    for (usize_t i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
         VS.emplace_back(Matrix::randomu(sz, 1));
         VS[i].normalize();
@@ -107,9 +107,9 @@ std::tuple<Matrix, Matrix> eig_inv_power(const Matrix& A, usize_t n, SolveMethod
         do
         {
             last_lam = lam(i, 0);
-            for (usize_t v_idx = 0; v_idx < i; v_idx++)
+            for (size_t v_idx = 0; v_idx < i; v_idx++)
                 ws[v_idx] = tmp.dot(VS[v_idx]);
-            for (usize_t v_idx = 0; v_idx < i; v_idx++)
+            for (size_t v_idx = 0; v_idx < i; v_idx++)
                 tmp -= (ws[v_idx] * VS[v_idx]);
             tmp.normalize();
 
@@ -142,19 +142,19 @@ std::tuple<Matrix, Matrix> eig_inv_power(const Matrix& A, usize_t n, SolveMethod
     }
 
     Matrix phis(sz, n);
-    for (usize_t i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
         phis.slice(0, sz, i, i + 1) = VS[i];
 
     return std::make_tuple(lam, phis);
 }
 
-std::tuple<usize_t, usize_t> matrix_max_offdiag(const Matrix& A)
+std::tuple<size_t, size_t> matrix_max_offdiag(const Matrix& A)
 {
-    std::tuple<usize_t, usize_t> idx{0, 1};
+    std::tuple<size_t, size_t> idx{0, 1};
     double m_v = 0;
-    for (usize_t i = 0; i < A.rows(); i++)
+    for (size_t i = 0; i < A.rows(); i++)
     {
-        for (usize_t j = 0; j < i; j++)
+        for (size_t j = 0; j < i; j++)
         {
             if (m_v < std::abs(A(i, j)))
             {
@@ -176,7 +176,7 @@ std::tuple<Matrix, Matrix> eig_jacobi(const ccm::Matrix& A, double eps)
     Matrix Lam_i(n, 1), Lam_j(n, 1);
     Matrix Phi_i(n, 1);
 
-    ccm::usize_t i, j;
+    ccm::size_t i, j;
     std::tie(i, j) = matrix_max_offdiag(A);
     double theta, sv, cv;
     while (std::abs(Lam(i, j)) > eps)
@@ -185,7 +185,7 @@ std::tuple<Matrix, Matrix> eig_jacobi(const ccm::Matrix& A, double eps)
         sv = std::sin(theta);
         cv = std::cos(theta);
 
-        for (usize_t it = 0; it < n; it++)
+        for (size_t it = 0; it < n; it++)
         {
             Lam_i(it, 0) = Lam(i, it);
             Lam_j(it, 0) = Lam(j, it);
@@ -194,7 +194,7 @@ std::tuple<Matrix, Matrix> eig_jacobi(const ccm::Matrix& A, double eps)
 
         Lam.col(i) = Lam_i * cv - Lam_j * sv;
         Lam.col(j) = Lam_j * cv + Lam_i * sv;
-        for (ccm::usize_t k = 0; k < n; k++)
+        for (ccm::size_t k = 0; k < n; k++)
         {
             Lam(j, k) = Lam(k, j);
             Lam(i, k) = Lam(k, i);
@@ -213,7 +213,7 @@ std::tuple<Matrix, Matrix> eig_jacobi(const ccm::Matrix& A, double eps)
 }
 
 std::tuple<Matrix, Matrix>
-eig_subspace_pow(const Matrix& A, usize_t m, int iters, double eps, double jacobi_eps)
+eig_subspace_pow(const Matrix& A, size_t m, int iters, double eps, double jacobi_eps)
 {
     auto LP = std::make_tuple(Matrix(m, 1), Matrix::randomu(A.rows(), m));
     CCM_ASSERT((A.is_square()), "Only for square matrices");
@@ -228,17 +228,17 @@ eig_subspace_pow(const Matrix& A, usize_t m, int iters, double eps, double jacob
     Matrix tmp(n, 1), tmpnew(1, n);
 
     std::vector<double> ws(m);
-    usize_t i, j;
+    size_t i, j;
     while (true)
     {
         // power method for each Phi_i
-        for (usize_t i = 0; i < m; i++)
+        for (size_t i = 0; i < m; i++)
         {
             tmp = Phi.col(i);
             tmp.normalize();
             for (int itts = 0; itts < iters; itts++)
             {
-                for (usize_t v_idx = 0; v_idx < i; v_idx++)
+                for (size_t v_idx = 0; v_idx < i; v_idx++)
                 {
                     ws[v_idx] = tmp.dot(Phi.col(v_idx));
                     tmp -= (ws[v_idx] * Phi.col(v_idx));
@@ -264,7 +264,7 @@ eig_subspace_pow(const Matrix& A, usize_t m, int iters, double eps, double jacob
         Phi.swap(Phitmp);
     }
     auto& Lam = std::get<0>(LP);
-    for (usize_t i = 0; i < m; i++)
+    for (size_t i = 0; i < m; i++)
     {
         if (Phi(0, i) < 0)
             Phi.col(i) *= -1;
@@ -274,7 +274,7 @@ eig_subspace_pow(const Matrix& A, usize_t m, int iters, double eps, double jacob
 }
 
 std::tuple<Matrix, Matrix>
-eig_subspace_inv(const Matrix& A, usize_t m, int inv_iters, double eps, double jacobi_eps)
+eig_subspace_inv(const Matrix& A, size_t m, int inv_iters, double eps, double jacobi_eps)
 {
     auto LP = std::make_tuple(Matrix(m, 1), Matrix::randomu(A.rows(), m));
     CCM_ASSERT((A.is_square()), "Only for square matrices");
@@ -292,18 +292,18 @@ eig_subspace_inv(const Matrix& A, usize_t m, int inv_iters, double eps, double j
     Matrix B_old(B);
 
     std::vector<double> ws(m);
-    usize_t i, j;
+    size_t i, j;
     while (true)
     {
         // Inverse power method for each Phi_i
-        for (usize_t i = 0; i < m; i++)
+        for (size_t i = 0; i < m; i++)
         {
             tmp = Phi.col(i);
             tmp.normalize();
 
             for (int itts = 0; itts < inv_iters; itts++)
             {
-                for (usize_t v_idx = 0; v_idx < i; v_idx++)
+                for (size_t v_idx = 0; v_idx < i; v_idx++)
                 {
                     ws[v_idx] = tmp.dot(Phi.col(v_idx));
                     tmp -= (ws[v_idx] * Phi.col(v_idx));
@@ -329,7 +329,7 @@ eig_subspace_inv(const Matrix& A, usize_t m, int inv_iters, double eps, double j
         Phi.swap(Phitmp);
     }
     auto& Lam = std::get<0>(LP);
-    for (usize_t i = 0; i < m; i++)
+    for (size_t i = 0; i < m; i++)
     {
         if (Phi(0, i) < 0)
             Phi.col(i) *= -1;

@@ -6,12 +6,12 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
-#include <omp.h>
-#include <vector>
+#include <type_traits>
+
 namespace ccm
 {
-using size_t = long long;
-using usize_t = unsigned long long;
+using size_t = std::size_t;
+using ssize_t = std::make_signed_t<size_t>;
 
 class Matrix;
 class SubMatrix;
@@ -22,9 +22,8 @@ class BandMatrix;
 #define CCM_ASSERT(expr, msg)                                                                      \
     if (!expr)                                                                                     \
     {                                                                                              \
-        std::cerr << msg << " at " << __FILE__ << ":" << __LINE__ << " in " << __PRETTY_FUNCTION__ \
-                  << std::endl;                                                                    \
-        exit(-1);                                                                                  \
+        std::cerr << msg << " in " << __PRETTY_FUNCTION__ << std::endl;                            \
+        exit(1);                                                                                   \
     }
 #else
 #define CCM_ASSERT(expr, msg) ((void)0)

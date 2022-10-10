@@ -1,27 +1,27 @@
 #pragma once
-#include "abs_matrix.hpp"
+#include "matrix_trait.hpp"
 #include "submatrix.hpp"
 #include <vector>
 
 namespace ccm
 {
 
-class Matrix : public AbsMatrix<Matrix, Matrix>
+class Matrix : public MatrixTrait<Matrix, Matrix>
 {
 public:
-    using parent = AbsMatrix<Matrix, Matrix>;
+    using parent = MatrixTrait<Matrix, Matrix>;
     using parent::operator=;
 
     Matrix(std::initializer_list<double> L);
     Matrix(std::initializer_list<std::initializer_list<double>> L);
 
     explicit Matrix();
-    Matrix(usize_t n, usize_t m, double fill = 0);
+    Matrix(size_t n, size_t m, double fill = 0);
     Matrix(Matrix&& other);
     void swap(Matrix&);
 
-    static Matrix randomu(usize_t n, usize_t m);
-    static Matrix eye(usize_t n);
+    static Matrix randomu(size_t n, size_t m);
+    static Matrix eye(size_t n);
 
     Matrix(const Matrix& other);
 
@@ -42,7 +42,7 @@ public:
 
     // Resizes matrix, re-allocating if needed
     // Data is lost in the process
-    Matrix& resize(usize_t n, usize_t m);
+    Matrix& resize(size_t n, size_t m);
 
     // Iterator of all elements
     double* begin();
@@ -62,16 +62,16 @@ public:
     // constant Iterator of all non-zero elements
     const double* cfend() const;
 
-    usize_t row_col_to_idx(size_t r, size_t c) const;
+    size_t row_col_to_idx(size_t r, size_t c) const;
 
-    SubMatrix slice(usize_t from_row, usize_t to_row, usize_t from_col, usize_t to_col);
-    const SubMatrix slice(usize_t from_row, usize_t to_row, usize_t from_col, usize_t to_col) const;
+    SubMatrix slice(size_t from_row, size_t to_row, size_t from_col, size_t to_col);
+    const SubMatrix slice(size_t from_row, size_t to_row, size_t from_col, size_t to_col) const;
 
-    SubMatrix row(usize_t r);
-    const SubMatrix row(usize_t r) const;
+    SubMatrix row(size_t r);
+    const SubMatrix row(size_t r) const;
 
-    SubMatrix col(usize_t c);
-    const SubMatrix col(usize_t c) const;
+    SubMatrix col(size_t c);
+    const SubMatrix col(size_t c) const;
 
     // Transposes the matrix in-place
     Matrix& itranspose();

@@ -3,7 +3,7 @@
 namespace ccm
 {
 
-SubMatrix::SubMatrix(Matrix& Mat, usize_t offrow, usize_t offcol, usize_t rows, usize_t cols)
+SubMatrix::SubMatrix(Matrix& Mat, size_t offrow, size_t offcol, size_t rows, size_t cols)
     : parent()
     , m_const(false)
     , m_offset_row(offrow)
@@ -16,7 +16,7 @@ SubMatrix::SubMatrix(Matrix& Mat, usize_t offrow, usize_t offcol, usize_t rows, 
     m_ncol = cols;
 }
 
-SubMatrix::SubMatrix(const Matrix& Mat, usize_t offrow, usize_t offcol, usize_t rows, usize_t cols)
+SubMatrix::SubMatrix(const Matrix& Mat, size_t offrow, size_t offcol, size_t rows, size_t cols)
     : parent()
     , m_const(true)
     , m_offset_row(offrow)
@@ -29,7 +29,7 @@ SubMatrix::SubMatrix(const Matrix& Mat, usize_t offrow, usize_t offcol, usize_t 
     m_ncol = cols;
 }
 
-usize_t SubMatrix::row_col_to_idx(size_t r, size_t c) const
+size_t SubMatrix::row_col_to_idx(size_t r, size_t c) const
 {
     return (r + m_offset_row) * m_og_cols + c + m_offset_col;
 }
@@ -142,7 +142,7 @@ namespace inner
         return tot - otot;
     }
     template <bool Const, class UT>
-    auto implSliceIterator<Const, UT>::operator[](usize_t incr) ->
+    auto implSliceIterator<Const, UT>::operator[](size_t incr) ->
       typename implSliceIterator<Const, UT>::reference
     {
         auto dr = lldiv(m_idx_col + incr, m_M->cols());

@@ -2,7 +2,7 @@
 #include "matrix.hpp"
 namespace ccm
 {
-class BandMatrix : public AbsMatrix<BandMatrix, Matrix>
+class BandMatrix : public MatrixTrait<BandMatrix, Matrix>
 {
 public:
     double* begin();
@@ -10,7 +10,7 @@ public:
     double* end();
     const double* cend() const;
 
-    usize_t row_col_to_idx(size_t r, size_t c) const;
+    size_t row_col_to_idx(size_t r, size_t c) const;
 
     friend std::istream& operator>>(std::istream& is, BandMatrix& M);
 };

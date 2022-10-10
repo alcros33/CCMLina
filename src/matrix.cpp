@@ -1,14 +1,13 @@
 #include "matrix.hpp"
 #include "submatrix.hpp"
 #include <random>
-#include <vector>
 
 namespace ccm
 {
 
 Matrix::Matrix() {}
 
-Matrix::Matrix(usize_t n, usize_t m, double fill)
+Matrix::Matrix(size_t n, size_t m, double fill)
 {
     m_nrow = n, m_ncol = m;
     m_data = new double[n * m];
@@ -22,7 +21,7 @@ Matrix::Matrix(std::initializer_list<std::initializer_list<double>> L) : parent(
     m_data = new double[m_nrow * m_ncol];
     auto curr = L.begin();
     auto curr_iter = curr->begin();
-    for (usize_t i = 0; i < m_nrow * m_ncol; i++)
+    for (size_t i = 0; i < m_nrow * m_ncol; i++)
     {
         m_data[i] = *curr_iter;
         if (++curr_iter == curr->end())
@@ -39,7 +38,7 @@ Matrix::Matrix(std::initializer_list<double> L) : parent()
     m_ncol = 1;
     m_data = new double[m_nrow];
     auto it = L.begin();
-    for (usize_t i = 0; i < m_nrow; i++)
+    for (size_t i = 0; i < m_nrow; i++)
     {
         m_data[i] = it[i];
     }
@@ -91,7 +90,7 @@ void Matrix::swap(Matrix& b)
 
 Matrix::~Matrix() { delete[] m_data; }
 
-Matrix& Matrix::resize(usize_t n, usize_t m)
+Matrix& Matrix::resize(size_t n, size_t m)
 {
     if (m * n > m_nrow * m_ncol)
     {
@@ -102,7 +101,7 @@ Matrix& Matrix::resize(usize_t n, usize_t m)
     return *this;
 }
 
-Matrix Matrix::randomu(usize_t n, usize_t m)
+Matrix Matrix::randomu(size_t n, size_t m)
 {
     Matrix R(n, m);
     std::random_device rd; // Will be used to obtain a seed for the random number engine
@@ -116,10 +115,10 @@ Matrix Matrix::randomu(usize_t n, usize_t m)
     return R;
 }
 
-Matrix Matrix::eye(usize_t n)
+Matrix Matrix::eye(size_t n)
 {
     Matrix R(n, n);
-    for (usize_t i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
         R(i, i) = 1;
     return R;
 }
@@ -134,7 +133,7 @@ const double* Matrix::cfbegin() const { return m_data; }
 double* Matrix::fend() { return m_data + m_ncol * m_nrow; }
 const double* Matrix::cfend() const { return m_data + m_ncol * m_nrow; }
 
-usize_t Matrix::row_col_to_idx(size_t r, size_t c) const { return r * m_ncol + c; }
+size_t Matrix::row_col_to_idx(size_t r, size_t c) const { return r * m_ncol + c; }
 
 Matrix& Matrix::itranspose()
 {
@@ -171,43 +170,42 @@ void Matrix::_itranspose_cycle()
 
 void Matrix::_itranspose_square()
 {
-    for (ccm::usize_t i = 1; i < m_nrow; i++)
+    for (ccm::size_t i = 1; i < m_nrow; i++)
     {
-        for (ccm::usize_t j = 0; j < i; j++)
+        for (ccm::size_t j = 0; j < i; j++)
         {
             std::swap(this->operator()(i, j), this->operator()(j, i));
         }
     }
 }
 
-SubMatrix Matrix::slice(usize_t from_row, usize_t to_row, usize_t from_col, usize_t to_col)
+SubMatrix Matrix::slice(size_t from_row, size_t to_row, size_t from_col, size_t to_col)
 {
     return SubMatrix(
       static_cast<Matrix&>(*this), from_row, from_col, (to_row - from_row), (to_col - from_col));
 }
-const SubMatrix
-Matrix::slice(usize_t from_row, usize_t to_row, usize_t from_col, usize_t to_col) const
+const SubMatrix Matrix::slice(size_t from_row, size_t to_row, size_t from_col, size_t to_col) const
 {
     return SubMatrix(*this, from_row, from_col, (to_row - from_row), (to_col - from_col));
 }
 
-SubMatrix Matrix::row(usize_t r)
+SubMatrix Matrix::row(size_t r)
 {
     CCM_ASSERT((r < m_nrow), "Row out of range");
     return slice(r, r + 1, 0, m_ncol);
 }
-const SubMatrix Matrix::row(usize_t r) const
+const SubMatrix Matrix::row(size_t r) const
 {
     CCM_ASSERT((r < m_nrow), "Row out of range");
     return slice(r, r + 1, 0, m_ncol);
 }
 
-SubMatrix Matrix::col(usize_t c)
+SubMatrix Matrix::col(size_t c)
 {
     CCM_ASSERT((c < m_ncol), "Column out of range");
     return slice(0, m_nrow, c, c + 1);
 }
-const SubMatrix Matrix::col(usize_t c) const
+const SubMatrix Matrix::col(size_t c) const
 {
     CCM_ASSERT((c < m_ncol), "Column out of range");
     return slice(0, m_nrow, c, c + 1);
@@ -222,7 +220,7 @@ std::istream& operator>>(std::istream& is, Matrix& M)
     is >> std::setprecision(12);
     delete[] M.m_data;
     M.m_data = new double[M.m_ncol * M.m_nrow];
-    for (usize_t i = 0; i < M.m_ncol * M.m_nrow; i++)
+    for (size_t i = 0; i < M.m_ncol * M.m_nrow; i++)
         is >> M.m_data[i];
     is >> std::setprecision(old_prec);
     return is;

@@ -1,12 +1,13 @@
 #pragma once
 #include "common.hpp"
+#include <omp.h>
 
 namespace ccm
 {
 
 #define CCM_ABS_EWISE_OP_IMPL(OP)                                                                  \
     template <class Other>                                                                         \
-    EvalRetType operator OP(const AbsMatrix<Other, EvalRetType>& rhs) const                        \
+    EvalRetType operator OP(const MatrixTrait<Other, EvalRetType>& rhs) const                      \
     {                                                                                              \
         CCM_ASSERT_SAME_SIZE((*this), rhs);                                                        \
         EvalRetType res(underlying());                                                             \
@@ -14,7 +15,7 @@ namespace ccm
         return res;                                                                                \
     }                                                                                              \
     template <class Other>                                                                         \
-    UnderlyingT& operator OP##=(const AbsMatrix<Other, EvalRetType>& rhs)                          \
+    UnderlyingT& operator OP##=(const MatrixTrait<Other, EvalRetType>& rhs)                        \
     {                                                                                              \
         CCM_ASSERT_SAME_SIZE((*this), rhs);                                                        \
         auto it1 = underlying().begin();                                                           \
@@ -45,7 +46,7 @@ namespace ccm
         }                                                                                          \
         return underlying();                                                                       \
     }                                                                                              \
-    friend EvalRetType operator OP(double lhs, const AbsMatrix& rhs)                               \
+    friend EvalRetType operator OP(double lhs, const MatrixTrait& rhs)                             \
     {                                                                                              \
         EvalRetType res(rhs.underlying());                                                         \
         for (auto it = res.begin(); it != res.end(); it++)                                         \
@@ -56,13 +57,13 @@ namespace ccm
     }
 
 template <class UnderlyingT, class EvalRetType>
-class AbsMatrix
+class MatrixTrait
 {
 public:
-    explicit AbsMatrix() {}
-    AbsMatrix(const AbsMatrix& other) = delete;
-    AbsMatrix(AbsMatrix&& other) = delete;
-    AbsMatrix& operator=(const AbsMatrix& other) = delete;
+    explicit MatrixTrait() {}
+    MatrixTrait(const MatrixTrait& other) = delete;
+    MatrixTrait(MatrixTrait&& other) = delete;
+    MatrixTrait& operator=(const MatrixTrait& other) = delete;
     UnderlyingT& operator=(double rhs)
     {
         for (auto it = underlying().fbegin(); it != underlying().fend(); it++)
@@ -75,8 +76,8 @@ public:
     UnderlyingT& underlying() { return static_cast<UnderlyingT&>(*this); }
     const UnderlyingT& underlying() const { return static_cast<const UnderlyingT&>(*this); }
 
-    usize_t rows() const { return m_nrow; }
-    usize_t cols() const { return m_ncol; }
+    size_t rows() const { return m_nrow; }
+    size_t cols() const { return m_ncol; }
 
     bool is_square() const { return m_nrow == m_ncol; }
     bool is_vector() const { return m_ncol == 1; }
@@ -109,14 +110,14 @@ public:
 
     // Squared euclidean distance to other Matrix of same size
     template <class Other>
-    double sdist(const AbsMatrix<Other, EvalRetType>& B) const
+    double sdist(const MatrixTrait<Other, EvalRetType>& B) const
     {
         CCM_ASSERT_SAME_SIZE((*this), B);
         double res = 0;
         double tmp;
         auto it1 = underlying().cbegin();
         auto it2 = B.underlying().cbegin();
-        for (usize_t i = 0; i < m_ncol * m_nrow; i++)
+        for (size_t i = 0; i < m_ncol * m_nrow; i++)
         {
             tmp = it1[i] - it2[i];
             res += tmp * tmp;
@@ -126,19 +127,19 @@ public:
 
     // Euclidean distance to other Matrix of same size
     template <class Other>
-    double dist(const AbsMatrix<Other, EvalRetType>& B) const
+    double dist(const MatrixTrait<Other, EvalRetType>& B) const
     {
         return sqrt(sdist<Other>(B));
     }
 
     // For tests and debugging
     template <class Other>
-    bool operator==(const AbsMatrix<Other, EvalRetType>& B) const
+    bool operator==(const MatrixTrait<Other, EvalRetType>& B) const
     {
         CCM_ASSERT_SAME_SIZE((*this), B);
         auto it1 = underlying().cbegin();
         auto it2 = B.underlying().cbegin();
-        for (usize_t i = 0; i < m_ncol * m_nrow; i++)
+        for (size_t i = 0; i < m_ncol * m_nrow; i++)
         {
             if (it1[i] != it2[i])
                 return false;
@@ -171,13 +172,13 @@ public:
     double item() const { return underlying().data()[0]; }
 
     template <class Other>
-    double dot(const AbsMatrix<Other, EvalRetType>& B) const
+    double dot(const MatrixTrait<Other, EvalRetType>& B) const
     {
         CCM_ASSERT_SAME_SIZE((*this), B);
         auto it1 = underlying().cbegin();
         auto it2 = B.underlying().cbegin();
         double res = 0;
-        for (usize_t i = 0; i < m_ncol * m_nrow; i++)
+        for (size_t i = 0; i < m_ncol * m_nrow; i++)
         {
             res += (it1[i] * it2[i]);
         }
@@ -187,13 +188,13 @@ public:
     // element access
     double& operator()(size_t r, size_t c)
     {
-        assert(0 <= r && r < m_nrow && 0 <= c && c < m_ncol);
+        assert(r < m_nrow && c < m_ncol);
         return underlying().data()[underlying().row_col_to_idx(r, c)];
     }
     // element access
     const double& operator()(size_t r, size_t c) const
     {
-        assert(0 <= r && r < m_nrow && 0 <= c && c < m_ncol);
+        assert(r < m_nrow && c < m_ncol);
         return underlying().data()[underlying().row_col_to_idx(r, c)];
     }
 
@@ -204,7 +205,7 @@ public:
         return res;
     }
     template <class Other>
-    bool same_size(const AbsMatrix<Other, EvalRetType>& B) const
+    bool same_size(const MatrixTrait<Other, EvalRetType>& B) const
     {
         return m_ncol == B.cols() && m_nrow == B.rows();
     }
@@ -239,7 +240,7 @@ public:
     }
 
     template <class Other>
-    EvalRetType matmul(const AbsMatrix<Other, EvalRetType>& B) const
+    EvalRetType matmul(const MatrixTrait<Other, EvalRetType>& B) const
     {
         EvalRetType res(m_nrow, B.cols(), 0);
         CCM_ASSERT((m_ncol == B.rows()), "Mismatched dimensions for matmul");
@@ -250,7 +251,7 @@ public:
     // like matmul but asumes a transposed B
     // Less memory consumption
     template <class Other>
-    EvalRetType tmatmul(const AbsMatrix<Other, EvalRetType>& B) const
+    EvalRetType tmatmul(const MatrixTrait<Other, EvalRetType>& B) const
     {
         EvalRetType res(m_nrow, B.rows(), 0);
         CCM_ASSERT((m_ncol == B.cols()), "Mismatched dimensions for matmul");
@@ -260,7 +261,7 @@ public:
 
     // Stores matmul result in res output parameter
     template <class Other>
-    void _matmul(const AbsMatrix<Other, EvalRetType>& B, EvalRetType& ResOut) const
+    void _matmul(const MatrixTrait<Other, EvalRetType>& B, EvalRetType& ResOut) const
     {
         CCM_ASSERT((m_ncol == B.rows()), "Mismatched dimensions for matmul");
         CCM_ASSERT((m_nrow == ResOut.rows() && B.cols() == ResOut.cols()),
@@ -271,14 +272,14 @@ public:
         auto Ap = underlying().cbegin();
         double sum;
 #pragma omp parallel for collapse(2) private(Ap, Bp, sum)
-        for (usize_t i = 0; i < ResOut.rows(); i++)
+        for (size_t i = 0; i < ResOut.rows(); i++)
         {
-            for (usize_t j = 0; j < ResOut.cols(); j++)
+            for (size_t j = 0; j < ResOut.cols(); j++)
             {
                 sum = 0;
                 Ap = underlying().cbegin() + i * m_ncol; // Select ith row from A
                 Bp = BT.data() + j * BT.cols(); // select jth row from BTransposed
-                for (usize_t k = 0; k < m_ncol; k++)
+                for (size_t k = 0; k < m_ncol; k++)
                 {
                     sum += Ap[k] * Bp[k];
                 }
@@ -289,7 +290,7 @@ public:
 
     // Stores tmatmul result in res output parameter
     template <class Other>
-    void _tmatmul(const AbsMatrix<Other, EvalRetType>& B, EvalRetType& ResOut) const
+    void _tmatmul(const MatrixTrait<Other, EvalRetType>& B, EvalRetType& ResOut) const
     {
         CCM_ASSERT((m_ncol == B.cols()), "Mismatched dimensions for matmul");
         CCM_ASSERT((m_nrow == ResOut.rows() && B.rows() == ResOut.cols()),
@@ -298,14 +299,14 @@ public:
         auto Ap = underlying().cbegin();
         double sum;
 #pragma omp parallel for collapse(2) private(Ap, Bp, sum)
-        for (usize_t i = 0; i < ResOut.rows(); i++)
+        for (size_t i = 0; i < ResOut.rows(); i++)
         {
-            for (usize_t j = 0; j < ResOut.cols(); j++)
+            for (size_t j = 0; j < ResOut.cols(); j++)
             {
                 sum = 0;
                 Ap = underlying().cbegin() + i * m_ncol; // Select ith row from A
                 Bp = B.data() + j * B.cols(); // select jth row from BTransposed
-                for (usize_t k = 0; k < m_ncol; k++)
+                for (size_t k = 0; k < m_ncol; k++)
                 {
                     sum += Ap[k] * Bp[k];
                 }
@@ -315,19 +316,19 @@ public:
     }
 
 protected:
-    usize_t m_nrow{0}, m_ncol{0};
+    size_t m_nrow{0}, m_ncol{0};
     double* m_data{nullptr};
 };
 
 template <class UnderlyingT, class EvalRetType>
-std::ostream& operator<<(std::ostream& os, const AbsMatrix<UnderlyingT, EvalRetType>& M)
+std::ostream& operator<<(std::ostream& os, const MatrixTrait<UnderlyingT, EvalRetType>& M)
 {
     auto old_prec = os.precision();
     os << M.rows() << " " << M.cols() << "\n";
     os << std::setprecision(12);
-    for (usize_t i = 0; i < M.rows(); i++)
+    for (size_t i = 0; i < M.rows(); i++)
     {
-        for (usize_t j = 0; j < M.cols(); j++)
+        for (size_t j = 0; j < M.cols(); j++)
         {
             os << M(i, j);
             if (j != (M.cols() - 1))

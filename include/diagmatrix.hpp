@@ -2,6 +2,6 @@
 #include "matrix.hpp"
 namespace ccm
 {
-class DiagMatrix : public AbsMatrix<DiagMatrix, Matrix>
+class DiagMatrix : public MatrixTrait<DiagMatrix, Matrix>
 {};
 } // namespace ccm

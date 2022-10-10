@@ -13,7 +13,7 @@ void _solve_upper(const Matrix& U, const Matrix& b, Matrix& xout)
     double* xptr;
     const double* Uptr;
     double sum;
-    for (size_t i = n - 1; i >= 0; i--)
+    for (ssize_t i = n - 1; i >= 0; i--)
     {
         if (U(i, i) == 0)
         {
@@ -23,7 +23,7 @@ void _solve_upper(const Matrix& U, const Matrix& b, Matrix& xout)
         sum = 0;
         Uptr = U.data() + i * n; // select ith row
         xptr = xout.data(); // al vector data
-        for (usize_t j = i + 1; j < n; j++)
+        for (size_t j = i + 1; j < n; j++)
         {
             sum += Uptr[j] * xptr[j];
         }
@@ -42,7 +42,7 @@ void _solve_lower(const Matrix& L, const Matrix& b, Matrix& xout)
     double* xptr;
     const double* Lptr;
     double sum;
-    for (usize_t i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
         if (L(i, i) == 0)
         {
@@ -52,7 +52,7 @@ void _solve_lower(const Matrix& L, const Matrix& b, Matrix& xout)
         sum = 0;
         Lptr = L.data() + i * n; // select ith row
         xptr = xout.data(); // All vector data
-        for (usize_t j = 0; j < i; j++)
+        for (size_t j = 0; j < i; j++)
         {
             sum += Lptr[j] * xptr[j];
         }
@@ -88,15 +88,15 @@ void _solve_gauss(const Matrix& A, const Matrix& b, Matrix& xout)
     ccm::Matrix Am(A), bm(b);
     ccm::Matrix row_tmp(1, Am.cols());
     auto n = Am.rows();
-    ccm::usize_t piv_idx;
+    ccm::size_t piv_idx;
     double factor;
     double piv_val;
-    for (ccm::usize_t i = 0; i < n - 1; i++)
+    for (ccm::size_t i = 0; i < n - 1; i++)
     {
         // Row pivoting
         piv_idx = i;
         piv_val = fabs(Am(i, i));
-        for (ccm::usize_t row = i + 1; row < n; row++)
+        for (ccm::size_t row = i + 1; row < n; row++)
         {
             if (piv_val < fabs(Am(row, i)))
             {
@@ -112,7 +112,7 @@ void _solve_gauss(const Matrix& A, const Matrix& b, Matrix& xout)
             std::swap(bm(i, 0), bm(piv_idx, 0));
         }
 
-        for (ccm::usize_t row = i + 1; row < n; row++)
+        for (ccm::size_t row = i + 1; row < n; row++)
         {
             if (Am(i, i) == 0)
             {

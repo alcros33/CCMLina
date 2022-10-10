@@ -1,5 +1,5 @@
 #pragma once
-#include "abs_matrix.hpp"
+#include "matrix_trait.hpp"
 namespace ccm
 {
 
@@ -28,7 +28,7 @@ namespace inner
 
         difference_type operator-(const implSliceIterator& other) const;
 
-        reference operator[](usize_t incr);
+        reference operator[](size_t incr);
 
         reference operator*();
         pointer operator->();
@@ -38,7 +38,7 @@ namespace inner
 
     protected:
         mat_ptr m_M;
-        usize_t m_idx_row{0}, m_idx_col{0};
+        size_t m_idx_row{0}, m_idx_col{0};
         pointer m_data;
     };
 } // namespace inner
@@ -57,23 +57,23 @@ class SliceIter : public inner::implSliceIterator<false, SliceIter>
 };
 
 // A reference view into a matrix
-class SubMatrix : public AbsMatrix<SubMatrix, Matrix>
+class SubMatrix : public MatrixTrait<SubMatrix, Matrix>
 {
 public:
-    using parent = AbsMatrix<SubMatrix, Matrix>;
+    using parent = MatrixTrait<SubMatrix, Matrix>;
     using parent::operator=;
 
     SubMatrix() = delete;
     SubMatrix(const SubMatrix& other) = default;
     SubMatrix(SubMatrix&& other) = default;
 
-    SubMatrix(Matrix& Mat, usize_t offrow, usize_t offcol, usize_t rows, usize_t cols);
-    SubMatrix(const Matrix& Mat, usize_t offrow, usize_t offcol, usize_t rows, usize_t cols);
+    SubMatrix(Matrix& Mat, size_t offrow, size_t offcol, size_t rows, size_t cols);
+    SubMatrix(const Matrix& Mat, size_t offrow, size_t offcol, size_t rows, size_t cols);
 
     SubMatrix& operator=(const SubMatrix& other);
     SubMatrix& operator=(const Matrix& other);
 
-    usize_t row_col_to_idx(size_t r, size_t c) const;
+    size_t row_col_to_idx(size_t r, size_t c) const;
 
     double* data();
     const double* data() const;
@@ -101,8 +101,8 @@ public:
 
 protected:
     bool m_const;
-    usize_t m_offset_row, m_offset_col;
-    usize_t m_og_cols;
+    size_t m_offset_row, m_offset_col;
+    size_t m_og_cols;
     const double* m_cdata;
 };
 
