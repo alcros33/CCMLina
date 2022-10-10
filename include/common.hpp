@@ -29,6 +29,7 @@ class BandMatrix;
 #define CCM_ASSERT(expr, msg) ((void)0)
 #endif
 
-#define CCM_ASSERT_SAME_SIZE(first, second) CCM_ASSERT(first.same_size(second), "Mismatched sizes")
+#define CCM_ASSERT_SAME_SIZE(A, B)                                                                 \
+    CCM_ASSERT(A.same_size(B), "Mismatched sizes " << A.size() << " " << B.size())
 
 } // namespace ccm

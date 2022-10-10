@@ -56,6 +56,22 @@ namespace ccm
         return res;                                                                                \
     }
 
+struct MatrixSize
+{
+    size_t rows, cols;
+    inline bool operator==(const MatrixSize& other) const
+    {
+        return rows == other.rows && cols == other.cols;
+    }
+    inline bool operator!=(const MatrixSize& other) const { return !this->operator==(other); }
+};
+
+inline std::ostream& operator<<(std::ostream& os, const MatrixSize& size)
+{
+    os << "(" << size.rows << ", " << size.cols << ")";
+    return os;
+}
+
 template <class UnderlyingT, class EvalRetType>
 class MatrixTrait
 {
@@ -78,6 +94,7 @@ public:
 
     size_t rows() const { return m_nrow; }
     size_t cols() const { return m_ncol; }
+    MatrixSize size() const { return {m_nrow, m_ncol}; }
 
     bool is_square() const { return m_nrow == m_ncol; }
     bool is_vector() const { return m_ncol == 1; }
