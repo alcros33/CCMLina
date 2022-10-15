@@ -20,7 +20,8 @@ public:
     Matrix(Matrix&& other);
     void swap(Matrix&);
 
-    static Matrix randomu(size_t n, size_t m);
+    static Matrix randu(size_t n, size_t m);
+    static Matrix randu(size_t n, size_t m, double from, double to);
     static Matrix eye(size_t n);
 
     Matrix(const Matrix& other);

@@ -41,7 +41,7 @@ std::tuple<Matrix, Matrix> eig_power(const Matrix& A, size_t n, double eps)
 
     for (size_t i = 0; i < n; i++)
     {
-        VS.emplace_back(Matrix::randomu(sz, 1));
+        VS.emplace_back(Matrix::randu(sz, 1));
         VS[i].normalize();
         tmp = VS[i];
         do
@@ -101,7 +101,7 @@ std::tuple<Matrix, Matrix> eig_inv_power(const Matrix& A, size_t n, SolveMethod 
 
     for (size_t i = 0; i < n; i++)
     {
-        VS.emplace_back(Matrix::randomu(sz, 1));
+        VS.emplace_back(Matrix::randu(sz, 1));
         VS[i].normalize();
         tmp = VS[i];
         do
@@ -215,7 +215,7 @@ std::tuple<Matrix, Matrix> eig_jacobi(const ccm::Matrix& A, double eps)
 std::tuple<Matrix, Matrix>
 eig_subspace_pow(const Matrix& A, size_t m, int iters, double eps, double jacobi_eps)
 {
-    auto LP = std::make_tuple(Matrix(m, 1), Matrix::randomu(A.rows(), m));
+    auto LP = std::make_tuple(Matrix(m, 1), Matrix::randu(A.rows(), m));
     CCM_ASSERT((A.is_square()), "Only for square matrices");
     CCM_ASSERT((A.rows() > m), "m must be less than the size of a");
     auto n = A.rows();
@@ -276,7 +276,7 @@ eig_subspace_pow(const Matrix& A, size_t m, int iters, double eps, double jacobi
 std::tuple<Matrix, Matrix>
 eig_subspace_inv(const Matrix& A, size_t m, int inv_iters, double eps, double jacobi_eps)
 {
-    auto LP = std::make_tuple(Matrix(m, 1), Matrix::randomu(A.rows(), m));
+    auto LP = std::make_tuple(Matrix(m, 1), Matrix::randu(A.rows(), m));
     CCM_ASSERT((A.is_square()), "Only for square matrices");
     CCM_ASSERT((A.rows() > m), "m must be less than the size of a");
     auto n = A.rows();

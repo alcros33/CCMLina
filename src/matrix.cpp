@@ -101,12 +101,12 @@ Matrix& Matrix::resize(size_t n, size_t m)
     return *this;
 }
 
-Matrix Matrix::randomu(size_t n, size_t m)
+Matrix Matrix::randu(size_t n, size_t m, double from, double to)
 {
     Matrix R(n, m);
     std::random_device rd; // Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-    std::uniform_real_distribution<> dis(0.0, 1.0);
+    std::uniform_real_distribution<> dis(from, to);
     for (auto it = R.begin(); it != R.end(); it++)
     {
         (*it) = dis(gen);
@@ -114,6 +114,8 @@ Matrix Matrix::randomu(size_t n, size_t m)
 
     return R;
 }
+
+Matrix Matrix::randu(size_t n, size_t m) { return Matrix::randu(n, m, 0, 1); }
 
 Matrix Matrix::eye(size_t n)
 {
