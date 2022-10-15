@@ -214,6 +214,18 @@ public:
         assert(r < m_nrow && c < m_ncol);
         return underlying().data()[underlying().row_col_to_idx(r, c)];
     }
+    // flat element access
+    double& operator()(size_t idx)
+    {
+        assert(idx < m_nrow * m_ncol);
+        return underlying().data()[idx];
+    }
+    // flat element access
+    const double& operator()(size_t idx) const
+    {
+        assert(idx < m_nrow * m_ncol);
+        return underlying().data()[idx];
+    }
 
     EvalRetType transpose() const
     {
